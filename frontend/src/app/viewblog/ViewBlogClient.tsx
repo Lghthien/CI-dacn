@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // app/viewblog/ViewBlogClient.tsx
 "use client";
 import { useEffect, useState } from "react";

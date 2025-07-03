@@ -1,13 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   images: {
-    domains: ["localhost"],
+    domains: [process.env.HOST || "localhost"],
     remotePatterns: [
       {
         protocol: "http",
-        hostname: "localhost",
-        port: "4000", // nếu chạy cổng 4000
+        hostname: process.env.HOST || "localhost",
+        port: "4000",
       },
     ],
   },
