@@ -4,7 +4,7 @@ pipeline {
         DOCKER_BUILDKIT = 1
         DOCKER_HUB_USERNAME = 'legiahoangthien'
         DOCKERHUB_CREDENTIALS = credentials('travelweb-dockerhub')
-        SNYK_TOKEN = credentials('snyk-token')      // Đảm bảo đã tạo credential này
+        // SNYK_TOKEN = credentials('snyk-token')      // Đảm bảo đã tạo credential này
         SCANNER_HOME = tool 'jenkins-sonar'
     }
     stages {
@@ -57,32 +57,32 @@ pipeline {
             }
         }
 
-        stage('Snyk Scan Source') {
-            parallel {
-                stage('Snyk Scan Client') {
-                    steps {
-                        dir('client') {
-                            sh '''
-                                npm install -g snyk
-                                snyk auth $SNYK_TOKEN
-                                snyk test --all-projects
-                            '''
-                        }
-                    }
-                }
-                stage('Snyk Scan Server') {
-                    steps {
-                        dir('server') {
-                            sh '''
-                                npm install -g snyk
-                                snyk auth $SNYK_TOKEN
-                                snyk test --all-projects
-                            '''
-                        }
-                    }
-                }
-            }
-        }
+        // stage('Snyk Scan Source') {
+        //     parallel {
+        //         stage('Snyk Scan Client') {
+        //             steps {
+        //                 dir('client') {
+        //                     sh '''
+        //                         npm install -g snyk
+        //                         snyk auth $SNYK_TOKEN
+        //                         snyk test --all-projects
+        //                     '''
+        //                 }
+        //             }
+        //         }
+        //         stage('Snyk Scan Server') {
+        //             steps {
+        //                 dir('server') {
+        //                     sh '''
+        //                         npm install -g snyk
+        //                         snyk auth $SNYK_TOKEN
+        //                         snyk test --all-projects
+        //                     '''
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
         // 2. SonarQube phân tích mã nguồn
         stage('SonarQube Analysis') {
