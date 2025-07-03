@@ -3,18 +3,60 @@ pipeline {
     environment {
         DOCKER_BUILDKIT = 1
         DOCKER_HUB_USERNAME = 'legiahoangthien'
-        DOCKERHUB_CREDENTIALS = credentials('legiahoangthien-dockerhub')
+        DOCKERHUB_CREDENTIALS = credentials('travelweb-dockerhub')
         SNYK_TOKEN = credentials('snyk-token')      // Đảm bảo đã tạo credential này
         SCANNER_HOME = tool 'jenkins-sonar'
     }
     stages {
         stage('Clone Source') {
             steps {
-                git branch: 'main', url: 'https://github.com/Lghthien/Deploys_Jenkin.git'
+                git branch: 'main', url: 'https://github.com/Lghthien/CI-dacn.git'
             }
         }
 
-        // 1. Snyk Scan Source Code + Dependency (SCA)
+         stage('Run Unit Tests') {
+            parallel {
+                stage('Test Client') {
+                    steps {
+                        dir('client') {
+                            sh 'npm install'
+                            sh 'npm run test -- --passWithNoTests'
+                        }
+                    }
+                }
+                stage('Test Server') {
+                    steps {
+                        dir('server') {
+                            sh 'npm install'
+                            sh 'chmod +x ./node_modules/.bin/jest'
+                            sh 'npm run test -- --verbose'
+                        }
+                    }
+                }
+            }
+        }
+
+          stage('Run Unit Build') {
+            parallel {
+                stage('Build Client') {
+                    steps {
+                        dir('client') {
+                            sh 'npm install'
+                            sh 'npm run build'
+                        }
+                    }
+                }
+                stage('Build Server') {
+                    steps {
+                        dir('server') {
+                            sh 'npm install'
+                            sh 'npm run build'
+                        }
+                    }
+                }
+            }
+        }
+
         stage('Snyk Scan Source') {
             parallel {
                 stage('Snyk Scan Client') {
@@ -56,23 +98,25 @@ pipeline {
             }
         }
 
-        // 3. Unit Test song song cho cả client và server
-        stage('Run Unit Tests') {
+          stage('OWASP Dependency-Check') {
             parallel {
-                stage('Test Client') {
+                stage('Dependency-Check Client') {
                     steps {
                         dir('client') {
-                            sh 'npm install'
-                            sh 'npm run test -- --passWithNoTests'
+                            sh '''
+                                docker run --rm -v $(pwd):/src owasp/dependency-check \
+                                --project "client" --scan /src --format "HTML" --out /src/dependency-check-report
+                            '''
                         }
                     }
                 }
-                stage('Test Server') {
+                stage('Dependency-Check Server') {
                     steps {
                         dir('server') {
-                            sh 'npm install'
-                            sh 'chmod +x ./node_modules/.bin/jest'
-                            sh 'npm run test -- --verbose'
+                            sh '''
+                                docker run --rm -v $(pwd):/src owasp/dependency-check \
+                                --project "server" --scan /src --format "HTML" --out /src/dependency-check-report
+                            '''
                         }
                     }
                 }
