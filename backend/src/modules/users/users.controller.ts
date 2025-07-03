@@ -27,8 +27,12 @@ export class UsersController {
       storage: diskStorage({
         destination: './uploads/avatars',
         filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          cb(null, `${file.fieldname}-${uniqueSuffix}${extname(file.originalname)}`);
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(
+            null,
+            `${file.fieldname}-${uniqueSuffix}${extname(file.originalname)}`,
+          );
         },
       }),
       fileFilter: (req, file, cb) => {
@@ -46,11 +50,11 @@ export class UsersController {
   ) {
     // trả về link đầy đủ, tuyệt đối
     const avatarUrl = `http://localhost:4000/uploads/avatars/${file.filename}`;
-    
+
     const updated = await this.usersService.update(id, { avatar: avatarUrl });
     return updated;
   }
-  
+
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);

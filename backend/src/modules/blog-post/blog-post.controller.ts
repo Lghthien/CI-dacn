@@ -27,8 +27,12 @@ export class BlogPostController {
       storage: diskStorage({
         destination: './uploads/images-blog',
         filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          cb(null, `${file.fieldname}-${uniqueSuffix}${extname(file.originalname)}`);
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(
+            null,
+            `${file.fieldname}-${uniqueSuffix}${extname(file.originalname)}`,
+          );
         },
       }),
       fileFilter: (req, file, cb) => {
@@ -52,7 +56,7 @@ export class BlogPostController {
     const updated = await this.blogPostService.update(id, { image: imageUrl });
     return { url: imageUrl, ...updated };
   }
-  
+
   @Post()
   create(@Body() createBlogPostDto: CreateBlogPostDto) {
     return this.blogPostService.create(createBlogPostDto);

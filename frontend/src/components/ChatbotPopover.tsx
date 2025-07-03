@@ -6,7 +6,10 @@ export default function ChatbotPopover() {
   const [open, setOpen] = useState(false);
   const [model] = useState<"llama-3">("llama-3"); // Chỉ 1 model, dùng Together AI (LLaMA3)
   const [messages, setMessages] = useState([
-    { role: "bot", text: "Xin chào! Bạn cần hỏi gì về du lịch hoặc website này?" }
+    {
+      role: "bot",
+      text: "Xin chào! Bạn cần hỏi gì về du lịch hoặc website này?",
+    },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,17 +24,19 @@ export default function ChatbotPopover() {
     if (e) e.preventDefault();
     const question = input.trim();
     if (!question || loading) return;
-    setMessages(msgs => [...msgs, { role: "user", text: question }]);
+    setMessages((msgs) => [...msgs, { role: "user", text: question }]);
     setInput("");
     setLoading(true);
 
-    setMessages(msgs => [...msgs, { role: "bot", text: "🤖 Đang trả lời..." }]);
+    setMessages((msgs) => [
+      ...msgs,
+      { role: "bot", text: "🤖 Đang trả lời..." },
+    ]);
 
     // Lấy lịch sử hội thoại gần nhất
-    const history = [
-      ...messages,
-      { role: "user", text: question }
-    ].filter(m => m.text !== "🤖 Đang trả lời...").slice(-8);
+    const history = [...messages, { role: "user", text: question }]
+      .filter((m) => m.text !== "🤖 Đang trả lời...")
+      .slice(-8);
 
     try {
       const res = await fetch("http://localhost:4000/chat", {
@@ -39,10 +44,10 @@ export default function ChatbotPopover() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
-          messages: history.map(m => ({
+          messages: history.map((m) => ({
             role: m.role === "user" ? "user" : "assistant",
-            content: m.text
-          }))
+            content: m.text,
+          })),
         }),
       });
 
@@ -51,9 +56,9 @@ export default function ChatbotPopover() {
 
       if (!res.ok || !data.choices) {
         const errorMsg = data.error || "Lỗi gọi API!";
-        setMessages(msgs => [
-          ...msgs.filter(m => m.text !== "🤖 Đang trả lời..."),
-          { role: "bot", text: `❌ ${errorMsg}` }
+        setMessages((msgs) => [
+          ...msgs.filter((m) => m.text !== "🤖 Đang trả lời..."),
+          { role: "bot", text: `❌ ${errorMsg}` },
         ]);
         return;
       }
@@ -62,15 +67,15 @@ export default function ChatbotPopover() {
         data.choices?.[0]?.message?.content?.trim() ||
         data.choices?.[0]?.text?.trim() ||
         "AI không trả lời được.";
-      setMessages(msgs => [
-        ...msgs.filter(m => m.text !== "🤖 Đang trả lời..."),
-        { role: "bot", text: aiText }
+      setMessages((msgs) => [
+        ...msgs.filter((m) => m.text !== "🤖 Đang trả lời..."),
+        { role: "bot", text: aiText },
       ]);
-    } catch (err) {
+    } catch {
       setLoading(false);
-      setMessages(msgs => [
-        ...msgs.filter(m => m.text !== "🤖 Đang trả lời..."),
-        { role: "bot", text: "❌ Lỗi server hoặc mạng!" }
+      setMessages((msgs) => [
+        ...msgs.filter((m) => m.text !== "🤖 Đang trả lời..."),
+        { role: "bot", text: "❌ Lỗi server hoặc mạng!" },
       ]);
     }
   };
@@ -90,7 +95,7 @@ export default function ChatbotPopover() {
     <div className="relative">
       {/* Nút mở Chatbot */}
       <button
-        onClick={() => setOpen(o => !o)}
+        onClick={() => setOpen((o) => !o)}
         className="flex items-center justify-center w-11 h-11 bg-gradient-to-br from-sky-500 to-emerald-400 rounded-full shadow-lg text-white text-2xl hover:scale-110 transition-all"
         title="Trợ lý AI"
       >
@@ -101,7 +106,12 @@ export default function ChatbotPopover() {
         <div className="chatbot-popover absolute right-0 mt-2 z-50 w-[340px] max-w-[92vw] bg-white rounded-2xl shadow-2xl border border-sky-100 flex flex-col animate-fade-in-up">
           <div className="px-5 py-3 bg-gradient-to-r from-sky-500 to-emerald-400 text-white font-bold text-lg flex justify-between items-center rounded-t-2xl">
             <span>Chatbot AI</span>
-            <button onClick={() => setOpen(false)} className="text-white text-xl font-bold hover:text-gray-200">×</button>
+            <button
+              onClick={() => setOpen(false)}
+              className="text-white text-xl font-bold hover:text-gray-200"
+            >
+              ×
+            </button>
           </div>
           <div className="flex items-center gap-3 px-4 pt-2">
             <span className="text-xs text-gray-500">Model:</span>
@@ -116,28 +126,41 @@ export default function ChatbotPopover() {
           <div
             className="flex-1 px-4 py-2 space-y-2 overflow-y-auto max-h-[260px] min-h-[120px] bg-blue-50/30
             scrollbar-thin scrollbar-thumb-sky-400 scrollbar-track-blue-100"
-            style={{ overscrollBehavior: 'contain' }}
+            style={{ overscrollBehavior: "contain" }}
           >
             {messages.map((msg, i) => (
-              <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`px-4 py-2 rounded-xl max-w-[80%] shadow text-sm
-                    ${msg.role === "user"
-                      ? "bg-sky-600 text-white ml-8"
-                      : "bg-white text-gray-800 mr-8 border"}
+              <div
+                key={i}
+                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+              >
+                <div
+                  className={`px-4 py-2 rounded-xl max-w-[80%] shadow text-sm
+                    ${
+                      msg.role === "user"
+                        ? "bg-sky-600 text-white ml-8"
+                        : "bg-white text-gray-800 mr-8 border"
+                    }
                   `}
-                >{msg.text}</div>
+                >
+                  {msg.text}
+                </div>
               </div>
             ))}
             <div ref={chatEndRef}></div>
           </div>
-          <form onSubmit={handleSend} className="flex items-center gap-2 px-3 py-2 bg-white border-t rounded-b-2xl">
+          <form
+            onSubmit={handleSend}
+            className="flex items-center gap-2 px-3 py-2 bg-white border-t rounded-b-2xl"
+          >
             <input
               value={input}
-              onChange={e => setInput(e.target.value)}
+              onChange={(e) => setInput(e.target.value)}
               className="flex-1 px-3 py-2 rounded-xl border border-sky-200 outline-none text-base bg-blue-50 focus:border-emerald-400"
               placeholder={loading ? "Đang trả lời..." : "Nhập tin nhắn..."}
               disabled={loading}
-              onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) handleSend(e); }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) handleSend(e);
+              }}
             />
             <button
               type="submit"

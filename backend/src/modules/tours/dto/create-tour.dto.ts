@@ -27,7 +27,7 @@ export class CreateTourDto {
 
   @IsString()
   @IsOptional()
-  traveler?: number; 
+  traveler?: number;
 
   @IsNumber()
   @IsOptional()

@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument } from 'mongoose';
+import { HydratedDocument } from 'mongoose';
 export type TourDocument = HydratedDocument<Tour>;
 
 @Schema({ timestamps: true })
@@ -11,8 +11,8 @@ export class Tour {
   @Prop({}) price: number;
   @Prop({}) start_date: Date;
   @Prop({}) end_date: Date;
-  @Prop({default: 0}) traveler?: number; 
-  @Prop({default: 0}) capacity?: number;
+  @Prop({ default: 0 }) traveler?: number;
+  @Prop({ default: 0 }) capacity?: number;
   @Prop({}) image?: string;
 }
 export const TourSchema = SchemaFactory.createForClass(Tour);

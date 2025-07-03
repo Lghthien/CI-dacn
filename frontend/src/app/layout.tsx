@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-      <link
+        <link
           href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700&display=swap&subset=vietnamese"
           rel="stylesheet"
         />
@@ -36,16 +36,16 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-      <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <Header />
-            <main className="pt-16 min-h-[80vh]">{children}</main>
-            <Footer />
-      </ThemeProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Header />
+          <main className="pt-16 min-h-[80vh]">{children}</main>
+          <Footer />
+        </ThemeProvider>
       </body>
     </html>
   );

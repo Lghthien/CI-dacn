@@ -10,7 +10,7 @@ export class ChatService {
 
   async askTogether(
     messages: TogetherTypes.Chat.Completions.CompletionCreateParams['messages'],
-    model = 'meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo'
+    model = 'meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo',
   ): Promise<TogetherTypes.Chat.ChatCompletion> {
     const resp = await this.client.chat.completions.create({
       model,

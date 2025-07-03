@@ -21,9 +21,8 @@ export class BlogCommentService {
 
   async findAll(post?: string) {
     const filter = post ? { post } : {};
-    return this.blogCommentModel.find(filter).populate("user", "name");
+    return this.blogCommentModel.find(filter).populate('user', 'name');
   }
-  
 
   async findOne(id: string) {
     return this.blogCommentModel.findById(id).populate(['user', 'post']);

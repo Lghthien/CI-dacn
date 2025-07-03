@@ -26,14 +26,19 @@ export default function ForgotPasswordPage() {
     }
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/forgot`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/forgot`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        },
+      );
 
       if (res.ok) {
-        setMessage("✅ Mật khẩu của bạn đã được đặt lại thành 123456, vui lòng đăng nhập.");
+        setMessage(
+          "✅ Mật khẩu của bạn đã được đặt lại thành 123456, vui lòng đăng nhập.",
+        );
         setTimeout(() => router.push("/login"), 2000);
       } else {
         const data = await res.json();
@@ -52,7 +57,9 @@ export default function ForgotPasswordPage() {
         onSubmit={handleSubmit}
         className="space-y-4 w-full max-w-md bg-white rounded-2xl shadow-xl p-8"
       >
-        <h2 className="text-2xl font-bold text-center text-blue-800">Quên mật khẩu</h2>
+        <h2 className="text-2xl font-bold text-center text-blue-800">
+          Quên mật khẩu
+        </h2>
 
         <div>
           <Label htmlFor="email">Email</Label>
@@ -92,10 +99,7 @@ export default function ForgotPasswordPage() {
 
         <div className="text-sm text-center mt-2 text-gray-700">
           <span>Quay về </span>
-          <a
-            href="/login"
-            className="underline hover:text-blue-900"
-          >
+          <a href="/login" className="underline hover:text-blue-900">
             đăng nhập
           </a>
         </div>

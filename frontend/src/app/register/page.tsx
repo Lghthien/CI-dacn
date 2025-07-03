@@ -51,7 +51,9 @@ export default function RegisterPage() {
         onSubmit={handleSubmit}
         className="space-y-4 w-full max-w-md bg-white rounded-2xl shadow-xl p-8"
       >
-        <h2 className="text-2xl font-bold text-center text-blue-800">Đăng ký</h2>
+        <h2 className="text-2xl font-bold text-center text-blue-800">
+          Đăng ký
+        </h2>
 
         <div>
           <Label htmlFor="name">Họ và tên</Label>
@@ -102,10 +104,7 @@ export default function RegisterPage() {
         </Button>
 
         <div className="text-sm text-center mt-2 text-gray-700">
-          <Link
-            href="/login"
-            className="underline hover:text-blue-900"
-          >
+          <Link href="/login" className="underline hover:text-blue-900">
             Đã có tài khoản? Đăng nhập
           </Link>
         </div>

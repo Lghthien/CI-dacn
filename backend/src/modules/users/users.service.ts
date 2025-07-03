@@ -48,10 +48,13 @@ export class UsersService {
   }
 
   // Cập nhật mật khẩu cho người dùng
-  async updatePassword(userId: string, newHashedPassword: string): Promise<void> {
+  async updatePassword(
+    userId: string,
+    newHashedPassword: string,
+  ): Promise<void> {
     await this.userModel.updateOne(
       { _id: userId }, // Sử dụng _id thay vì name
-      { $set: { password: newHashedPassword } }
+      { $set: { password: newHashedPassword } },
     );
   }
 }

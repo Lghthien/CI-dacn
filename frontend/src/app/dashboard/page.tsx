@@ -1,22 +1,65 @@
-"use client"
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  Table, TableHeader, TableBody, TableRow, TableHead, TableCell
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
 } from "@/components/ui/table";
-import { ArrowRight, Users, Notebook, ShoppingCart, BarChart2, Globe, ImagePlus, Trash2 } from "lucide-react";
 import {
-  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  CartesianGrid, Legend
+  ArrowRight,
+  Users,
+  Notebook,
+  ShoppingCart,
+  BarChart2,
+  Globe,
+  ImagePlus,
+  Trash2,
+} from "lucide-react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  Legend,
 } from "recharts";
 
-type User = { _id: string, name: string, email: string, role: string, phone?: string };
-type Booking = { _id: string, user: any, tour: any, num_people: number, total_price: number, status: string, createdAt?: string };
-type Blog = { _id: string, title: string, author: any, createdAt: string };
+type User = {
+  _id: string;
+  name: string;
+  email: string;
+  role: string;
+  phone?: string;
+};
+type Booking = {
+  _id: string;
+  user: any;
+  tour: any;
+  num_people: number;
+  total_price: number;
+  status: string;
+  createdAt?: string;
+};
+type Blog = { _id: string; title: string; author: any; createdAt: string };
 type Tour = {
-  _id: string; title: string; location?: string; description?: string; price?: number;
-  capacity?: number; start_date?: string; end_date?: string; image?: string; organizer?: any;
+  _id: string;
+  title: string;
+  location?: string;
+  description?: string;
+  price?: number;
+  capacity?: number;
+  start_date?: string;
+  end_date?: string;
+  image?: string;
+  organizer?: any;
 };
 
 const BASE = process.env.NEXT_PUBLIC_API_URL;
@@ -46,10 +89,16 @@ export default function DashboardPage() {
   // CRUD Tour
   const [creating, setCreating] = useState(false);
   const [newTour, setNewTour] = useState({
-    title: "", location: "", description: "", price: "", capacity: "",
-    start_date: "", end_date: "", image: ""
+    title: "",
+    location: "",
+    description: "",
+    price: "",
+    capacity: "",
+    start_date: "",
+    end_date: "",
+    image: "",
   });
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
 
   // Kiểm tra quyền
@@ -73,15 +122,26 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!isAdmin) return;
     const token = localStorage.getItem("access_token");
-    fetch(`${BASE}/users`, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.json()).then(setUsers);
-    fetch(`${BASE}/booking`, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.json()).then(data => {
-      setBookings(data);
-      const total = data.filter((b: Booking) => b.status === "confirmed")
-        .reduce((sum: number, b: Booking) => sum + (b.total_price || 0), 0);
-      setRevenue(total);
-    });
-    fetch(`${BASE}/blog-post`, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.json()).then(setBlogs);
-    fetch(`${BASE}/tours`, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.json()).then(setTours);
+    fetch(`${BASE}/users`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => res.json())
+      .then(setUsers);
+    fetch(`${BASE}/booking`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => res.json())
+      .then((data) => {
+        setBookings(data);
+        const total = data
+          .filter((b: Booking) => b.status === "confirmed")
+          .reduce((sum: number, b: Booking) => sum + (b.total_price || 0), 0);
+        setRevenue(total);
+      });
+    fetch(`${BASE}/blog-post`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then(setBlogs);
+    fetch(`${BASE}/tours`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => res.json())
+      .then(setTours);
   }, [isAdmin]);
 
   // Biểu đồ doanh thu
@@ -93,9 +153,9 @@ export default function DashboardPage() {
       const monthly = Array.from({ length: 12 }, (_, i) => ({
         name: `T${i + 1}`,
         revenue: 0,
-        bookings: 0
+        bookings: 0,
       }));
-      bookings.forEach(b => {
+      bookings.forEach((b) => {
         if (b.status !== "confirmed") return;
         const date = new Date(b.createdAt ?? "");
         if (date.getFullYear() === year) {
@@ -107,7 +167,7 @@ export default function DashboardPage() {
       setChartData(monthly);
     } else {
       const years: Record<string, { revenue: number; bookings: number }> = {};
-      bookings.forEach(b => {
+      bookings.forEach((b) => {
         if (b.status !== "confirmed") return;
         const date = new Date(b.createdAt ?? "");
         const y = date.getFullYear();
@@ -121,7 +181,7 @@ export default function DashboardPage() {
         .map(([year, val]) => ({
           name: year,
           revenue: val.revenue,
-          bookings: val.bookings
+          bookings: val.bookings,
         }));
       setChartData(sortedYears);
     }
@@ -139,14 +199,17 @@ export default function DashboardPage() {
     const token = localStorage.getItem("access_token");
     const res = await fetch(`${BASE}/booking/${id}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify({ status }),
     });
     if (res.ok) {
       setMessage("✔️ Cập nhật booking thành công!");
-      setBookings(bookings.map(b => b._id === id ? { ...b, status } : b));
+      setBookings(bookings.map((b) => (b._id === id ? { ...b, status } : b)));
       if (status === "confirmed") {
-        const booking = bookings.find(b => b._id === id);
+        const booking = bookings.find((b) => b._id === id);
         setRevenue(revenue + (booking?.total_price || 0));
       }
     } else {
@@ -163,7 +226,7 @@ export default function DashboardPage() {
     });
     if (res.ok) {
       setMessage("🗑️ Xóa user thành công!");
-      setUsers(users.filter(u => u._id !== id));
+      setUsers(users.filter((u) => u._id !== id));
     } else {
       setMessage("❌ Lỗi khi xóa user.");
     }
@@ -178,7 +241,7 @@ export default function DashboardPage() {
     });
     if (res.ok) {
       setMessage("🗑️ Xóa blog thành công!");
-      setBlogs(blogs.filter(b => b._id !== id));
+      setBlogs(blogs.filter((b) => b._id !== id));
     } else {
       setMessage("❌ Lỗi khi xóa blog.");
     }
@@ -193,7 +256,7 @@ export default function DashboardPage() {
     });
     if (res.ok) {
       setMessage("🗑️ Xóa tour thành công!");
-      setTours(tours.filter(t => t._id !== id));
+      setTours(tours.filter((t) => t._id !== id));
     } else {
       setMessage("❌ Lỗi khi xóa tour.");
     }
@@ -212,7 +275,7 @@ export default function DashboardPage() {
     });
     if (res.ok) {
       const { url } = await res.json();
-      setNewTour(t => ({ ...t, image: url }));
+      setNewTour((t) => ({ ...t, image: url }));
       setMessage("Tải ảnh thành công!");
     } else {
       setMessage("❌ Tải ảnh thất bại!");
@@ -251,7 +314,16 @@ export default function DashboardPage() {
       setMessage("✔️ Đăng tour thành công!");
       const data = await res.json();
       setTours([...tours, data]);
-      setNewTour({ title: "", location: "", description: "", price: "", capacity: "", start_date: "", end_date: "", image: "" });
+      setNewTour({
+        title: "",
+        location: "",
+        description: "",
+        price: "",
+        capacity: "",
+        start_date: "",
+        end_date: "",
+        image: "",
+      });
       setImageFile(null);
       setPreviewUrl("");
     } else {
@@ -259,14 +331,26 @@ export default function DashboardPage() {
     }
   };
 
-  if (isAdmin === null) return <div className="flex items-center justify-center h-screen text-2xl">Đang kiểm tra quyền truy cập...</div>;
-  if (!isAdmin) return <div className="flex items-center justify-center h-screen text-2xl text-red-500">Bạn không có quyền truy cập trang này!</div>;
+  if (isAdmin === null)
+    return (
+      <div className="flex items-center justify-center h-screen text-2xl">
+        Đang kiểm tra quyền truy cập...
+      </div>
+    );
+  if (!isAdmin)
+    return (
+      <div className="flex items-center justify-center h-screen text-2xl text-red-500">
+        Bạn không có quyền truy cập trang này!
+      </div>
+    );
 
   return (
     <div className="min-h-screen flex bg-gradient-to-r from-sky-50 via-blue-50 to-emerald-50">
       {/* Sidebar */}
       <aside className="w-[240px] min-h-screen bg-gradient-to-b from-sky-800 to-sky-500 shadow-2xl flex flex-col gap-2 pt-14 px-5 rounded-r-3xl border-r border-blue-100">
-        <div className="text-2xl font-black tracking-tight text-white mb-8 pl-2">Admin Panel</div>
+        <div className="text-2xl font-black tracking-tight text-white mb-8 pl-2">
+          Admin Panel
+        </div>
         {tabs.map(({ key, label, icon: Icon }) => (
           <Button
             key={key}
@@ -274,9 +358,11 @@ export default function DashboardPage() {
             variant="ghost"
             className={`justify-start gap-3 w-full mb-1 text-base font-semibold rounded-xl px-4 py-2
               transition-all duration-150
-              ${activeTab === key
-                ? "bg-white text-sky-800 shadow-md scale-[1.04]"
-                : "text-sky-100 hover:bg-sky-700 hover:text-white"}`}
+              ${
+                activeTab === key
+                  ? "bg-white text-sky-800 shadow-md scale-[1.04]"
+                  : "text-sky-100 hover:bg-sky-700 hover:text-white"
+              }`}
           >
             <Icon size={22} /> {label}
           </Button>
@@ -299,29 +385,58 @@ export default function DashboardPage() {
               <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
                 <div>
                   <div className="flex gap-4 items-end">
-                    <div className="text-5xl font-extrabold text-emerald-600 drop-shadow">{revenue.toLocaleString()}₫</div>
+                    <div className="text-5xl font-extrabold text-emerald-600 drop-shadow">
+                      {revenue.toLocaleString()}₫
+                    </div>
                     <Button
                       variant="outline"
                       className="ml-2 px-3 text-sm font-semibold border-emerald-400 shadow-md rounded-xl"
-                      onClick={() => setChartMode(m => m === "month" ? "year" : "month")}
+                      onClick={() =>
+                        setChartMode((m) => (m === "month" ? "year" : "month"))
+                      }
                     >
                       Xem theo: {chartMode === "month" ? "năm" : "tháng"}
                     </Button>
                   </div>
-                  <div className="text-lg text-sky-700 mt-1">Tổng doanh thu các booking đã xác nhận</div>
+                  <div className="text-lg text-sky-700 mt-1">
+                    Tổng doanh thu các booking đã xác nhận
+                  </div>
                 </div>
-                <ArrowRight size={56} className="text-emerald-400 hidden md:block" />
+                <ArrowRight
+                  size={56}
+                  className="text-emerald-400 hidden md:block"
+                />
               </div>
               <div className="w-full h-[360px] mt-6">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" fontSize={14} />
-                    <YAxis fontSize={14} tickFormatter={v => v.toLocaleString()} />
-                    <Tooltip formatter={v => Number(v).toLocaleString() + "₫"} />
+                    <YAxis
+                      fontSize={14}
+                      tickFormatter={(v) => v.toLocaleString()}
+                    />
+                    <Tooltip
+                      formatter={(v) => Number(v).toLocaleString() + "₫"}
+                    />
                     <Legend verticalAlign="top" height={36} />
-                    <Line type="monotone" dataKey="revenue" name="Doanh thu" stroke="#10b981" strokeWidth={3} dot={{ r: 6 }} />
-                    <Line type="monotone" dataKey="bookings" name="Số đơn" stroke="#2563eb" strokeDasharray="5 5" strokeWidth={2} dot={{ r: 5 }} />
+                    <Line
+                      type="monotone"
+                      dataKey="revenue"
+                      name="Doanh thu"
+                      stroke="#10b981"
+                      strokeWidth={3}
+                      dot={{ r: 6 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="bookings"
+                      name="Số đơn"
+                      stroke="#2563eb"
+                      strokeDasharray="5 5"
+                      strokeWidth={2}
+                      dot={{ r: 5 }}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -333,7 +448,9 @@ export default function DashboardPage() {
         {activeTab === "users" && (
           <Card className="rounded-3xl shadow-xl border border-blue-100 bg-white/90">
             <CardContent className="py-8">
-              <h2 className="text-2xl font-bold text-sky-800 mb-6">Tài khoản người dùng</h2>
+              <h2 className="text-2xl font-bold text-sky-800 mb-6">
+                Tài khoản người dùng
+              </h2>
               <div className="overflow-x-auto rounded-xl border">
                 <Table>
                   <TableHeader>
@@ -347,7 +464,7 @@ export default function DashboardPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {users.map(u => (
+                    {users.map((u) => (
                       <TableRow key={u._id} className="hover:bg-sky-50/50">
                         <TableCell>{u._id}</TableCell>
                         <TableCell>{u.name}</TableCell>
@@ -375,7 +492,9 @@ export default function DashboardPage() {
         {activeTab === "bookings" && (
           <Card className="rounded-3xl shadow-xl border border-sky-100 bg-white/90">
             <CardContent className="py-8">
-              <h2 className="text-2xl font-bold text-sky-800 mb-6">Đơn đặt tour</h2>
+              <h2 className="text-2xl font-bold text-sky-800 mb-6">
+                Đơn đặt tour
+              </h2>
               <div className="overflow-x-auto rounded-xl border">
                 <Table>
                   <TableHeader>
@@ -390,27 +509,39 @@ export default function DashboardPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {bookings.map(b => (
+                    {bookings.map((b) => (
                       <TableRow key={b._id} className="hover:bg-sky-50/40">
                         <TableCell>{b._id}</TableCell>
                         <TableCell>{b.user?.name || "?"}</TableCell>
                         <TableCell>{b.tour?.title || "?"}</TableCell>
                         <TableCell>{b.num_people}</TableCell>
-                        <TableCell>{b.total_price?.toLocaleString()}₫</TableCell>
                         <TableCell>
-                          <span className={`px-3 py-1 rounded-2xl text-xs font-bold transition-all
-                            ${b.status === "confirmed" ? "bg-emerald-100 text-emerald-700" : 
-                            b.status === "pending" ? "bg-yellow-100 text-yellow-700" : 
-                            "bg-gray-200 text-gray-600"}`}>
+                          {b.total_price?.toLocaleString()}₫
+                        </TableCell>
+                        <TableCell>
+                          <span
+                            className={`px-3 py-1 rounded-2xl text-xs font-bold transition-all
+                            ${
+                              b.status === "confirmed"
+                                ? "bg-emerald-100 text-emerald-700"
+                                : b.status === "pending"
+                                  ? "bg-yellow-100 text-yellow-700"
+                                  : "bg-gray-200 text-gray-600"
+                            }`}
+                          >
                             {b.status}
                           </span>
                         </TableCell>
                         <TableCell>
                           {b.status !== "confirmed" && (
                             <Button
-                              onClick={() => handleApproveBooking(b._id, "confirmed")}
+                              onClick={() =>
+                                handleApproveBooking(b._id, "confirmed")
+                              }
                               className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1 rounded-xl transition-all duration-150 active:scale-95"
-                            >Duyệt</Button>
+                            >
+                              Duyệt
+                            </Button>
                           )}
                         </TableCell>
                       </TableRow>
@@ -426,7 +557,9 @@ export default function DashboardPage() {
         {activeTab === "tours" && (
           <Card className="rounded-3xl shadow-xl border border-sky-100 bg-white/90">
             <CardContent className="py-8">
-              <h2 className="text-2xl font-bold text-sky-800 mb-8">Quản lý Tour</h2>
+              <h2 className="text-2xl font-bold text-sky-800 mb-8">
+                Quản lý Tour
+              </h2>
               {/* Đăng tour mới */}
               <form
                 onSubmit={handleCreateTour}
@@ -447,7 +580,9 @@ export default function DashboardPage() {
                           <ImagePlus size={38} />
                         </span>
                       )}
-                      <span className="text-xs text-sky-700 underline">Tải ảnh tour</span>
+                      <span className="text-xs text-sky-700 underline">
+                        Tải ảnh tour
+                      </span>
                     </span>
                     <input
                       type="file"
@@ -461,14 +596,18 @@ export default function DashboardPage() {
                   className="px-4 py-2 rounded-xl border border-sky-200 w-[210px] text-base bg-white shadow-sm"
                   placeholder="Tên tour*"
                   value={newTour.title}
-                  onChange={e => setNewTour({ ...newTour, title: e.target.value })}
+                  onChange={(e) =>
+                    setNewTour({ ...newTour, title: e.target.value })
+                  }
                   required
                 />
                 <input
                   className="px-4 py-2 rounded-xl border border-sky-200 w-[160px] text-base bg-white shadow-sm"
                   placeholder="Địa điểm*"
                   value={newTour.location}
-                  onChange={e => setNewTour({ ...newTour, location: e.target.value })}
+                  onChange={(e) =>
+                    setNewTour({ ...newTour, location: e.target.value })
+                  }
                   required
                 />
                 <input
@@ -477,7 +616,9 @@ export default function DashboardPage() {
                   type="number"
                   min="0"
                   value={newTour.price}
-                  onChange={e => setNewTour({ ...newTour, price: e.target.value })}
+                  onChange={(e) =>
+                    setNewTour({ ...newTour, price: e.target.value })
+                  }
                   required
                 />
                 <input
@@ -486,27 +627,35 @@ export default function DashboardPage() {
                   type="number"
                   min="1"
                   value={newTour.capacity}
-                  onChange={e => setNewTour({ ...newTour, capacity: e.target.value })}
+                  onChange={(e) =>
+                    setNewTour({ ...newTour, capacity: e.target.value })
+                  }
                 />
                 <input
                   className="px-4 py-2 rounded-xl border border-sky-200 w-[155px] text-base bg-white shadow-sm"
                   type="date"
                   placeholder="Ngày bắt đầu"
                   value={newTour.start_date}
-                  onChange={e => setNewTour({ ...newTour, start_date: e.target.value })}
+                  onChange={(e) =>
+                    setNewTour({ ...newTour, start_date: e.target.value })
+                  }
                 />
                 <input
                   className="px-4 py-2 rounded-xl border border-sky-200 w-[155px] text-base bg-white shadow-sm"
                   type="date"
                   placeholder="Ngày kết thúc"
                   value={newTour.end_date}
-                  onChange={e => setNewTour({ ...newTour, end_date: e.target.value })}
+                  onChange={(e) =>
+                    setNewTour({ ...newTour, end_date: e.target.value })
+                  }
                 />
                 <input
                   className="px-4 py-2 rounded-xl border border-sky-200 w-full text-base bg-white shadow-sm"
                   placeholder="Mô tả"
                   value={newTour.description}
-                  onChange={e => setNewTour({ ...newTour, description: e.target.value })}
+                  onChange={(e) =>
+                    setNewTour({ ...newTour, description: e.target.value })
+                  }
                 />
                 <Button
                   type="submit"
@@ -533,17 +682,33 @@ export default function DashboardPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {tours.map(tour => (
+                    {tours.map((tour) => (
                       <TableRow key={tour._id} className="hover:bg-sky-50/40">
                         <TableCell>{tour._id}</TableCell>
                         <TableCell>{tour.title}</TableCell>
                         <TableCell>{tour.location}</TableCell>
                         <TableCell>{tour.price?.toLocaleString()}₫</TableCell>
-                        <TableCell>{tour.start_date ? new Date(tour.start_date).toLocaleDateString("vi-VN") : ""}</TableCell>
-                        <TableCell>{tour.end_date ? new Date(tour.end_date).toLocaleDateString("vi-VN") : ""}</TableCell>
+                        <TableCell>
+                          {tour.start_date
+                            ? new Date(tour.start_date).toLocaleDateString(
+                                "vi-VN",
+                              )
+                            : ""}
+                        </TableCell>
+                        <TableCell>
+                          {tour.end_date
+                            ? new Date(tour.end_date).toLocaleDateString(
+                                "vi-VN",
+                              )
+                            : ""}
+                        </TableCell>
                         <TableCell>
                           {tour.image && (
-                            <img src={tour.image} alt="tour" className="w-16 h-14 object-cover rounded-xl shadow border" />
+                            <img
+                              src={tour.image}
+                              alt="tour"
+                              className="w-16 h-14 object-cover rounded-xl shadow border"
+                            />
                           )}
                         </TableCell>
                         <TableCell>
@@ -559,7 +724,9 @@ export default function DashboardPage() {
                   </TableBody>
                 </Table>
                 {tours.length === 0 && (
-                  <div className="text-center text-gray-500 py-5">Chưa có tour nào.</div>
+                  <div className="text-center text-gray-500 py-5">
+                    Chưa có tour nào.
+                  </div>
                 )}
               </div>
             </CardContent>
@@ -570,7 +737,9 @@ export default function DashboardPage() {
         {activeTab === "blogs" && (
           <Card className="rounded-3xl shadow-xl border border-blue-100 bg-white/90">
             <CardContent className="py-8">
-              <h2 className="text-2xl font-bold text-sky-800 mb-6">Danh sách Blog</h2>
+              <h2 className="text-2xl font-bold text-sky-800 mb-6">
+                Danh sách Blog
+              </h2>
               <div className="overflow-x-auto rounded-xl border">
                 <Table>
                   <TableHeader>
@@ -583,12 +752,16 @@ export default function DashboardPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {blogs.map(b => (
+                    {blogs.map((b) => (
                       <TableRow key={b._id} className="hover:bg-sky-50/40">
                         <TableCell>{b._id}</TableCell>
                         <TableCell>{b.title}</TableCell>
                         <TableCell>{b.author?.name || "?"}</TableCell>
-                        <TableCell>{b.createdAt ? new Date(b.createdAt).toLocaleDateString("vi-VN") : ""}</TableCell>
+                        <TableCell>
+                          {b.createdAt
+                            ? new Date(b.createdAt).toLocaleDateString("vi-VN")
+                            : ""}
+                        </TableCell>
                         <TableCell>
                           <Button
                             onClick={() => handleDeleteBlog(b._id)}
@@ -602,7 +775,9 @@ export default function DashboardPage() {
                   </TableBody>
                 </Table>
                 {blogs.length === 0 && (
-                  <div className="text-center text-gray-400 py-5">Không có bài viết nào!</div>
+                  <div className="text-center text-gray-400 py-5">
+                    Không có bài viết nào!
+                  </div>
                 )}
               </div>
             </CardContent>

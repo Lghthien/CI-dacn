@@ -1,4 +1,11 @@
-import { Body, Controller, Post, HttpCode, HttpStatus, BadRequestException } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  HttpCode,
+  HttpStatus,
+  BadRequestException,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { ForgotDto } from './dto/forgot.dto';
@@ -17,10 +24,7 @@ export class AuthController {
       throw new BadRequestException('Email và mật khẩu không được bỏ trống');
     }
 
-    return this.authService.signIn(
-      loginDto.email,
-      loginDto.password,
-    );
+    return this.authService.signIn(loginDto.email, loginDto.password);
   }
 
   @HttpCode(HttpStatus.OK)
@@ -34,9 +38,6 @@ export class AuthController {
       throw new BadRequestException('Email và tên không được bỏ trống');
     }
 
-    return this.authService.forgotPassword(
-      forgotDto.email,
-      forgotDto.name,
-    );
+    return this.authService.forgotPassword(forgotDto.email, forgotDto.name);
   }
 }

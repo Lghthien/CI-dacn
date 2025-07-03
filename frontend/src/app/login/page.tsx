@@ -64,7 +64,9 @@ export default function LoginPage() {
         onSubmit={handleSubmit}
         className="space-y-4 w-full max-w-md bg-white rounded-2xl shadow-xl p-8"
       >
-        <h2 className="text-2xl font-bold text-center text-sky-800">Đăng nhập</h2>
+        <h2 className="text-2xl font-bold text-center text-sky-800">
+          Đăng nhập
+        </h2>
 
         <div>
           <Label htmlFor="email">Email</Label>
@@ -104,17 +106,11 @@ export default function LoginPage() {
         </Button>
 
         <div className="text-sm text-center mt-2 text-gray-700">
-          <Link
-            href="/register"
-            className="underline hover:text-blue-900"
-          >
+          <Link href="/register" className="underline hover:text-blue-900">
             Chưa có tài khoản?
           </Link>{" "}
           |{" "}
-          <Link
-            href="/forgot"
-            className="underline hover:text-blue-900"
-          >
+          <Link href="/forgot" className="underline hover:text-blue-900">
             Quên mật khẩu
           </Link>
         </div>

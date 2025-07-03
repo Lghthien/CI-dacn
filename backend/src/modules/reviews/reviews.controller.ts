@@ -6,7 +6,7 @@ import {
   Patch,
   Param,
   Delete,
-  Query, 
+  Query,
 } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';

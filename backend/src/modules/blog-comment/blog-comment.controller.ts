@@ -20,11 +20,10 @@ export class BlogCommentController {
     return this.blogCommentService.create(createBlogCommentDto);
   }
 
-    @Get()
-    findAll(@Query('post') post?: string) {
-      return this.blogCommentService.findAll(post);
-    }
-    
+  @Get()
+  findAll(@Query('post') post?: string) {
+    return this.blogCommentService.findAll(post);
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {

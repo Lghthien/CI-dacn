@@ -11,14 +11,13 @@ export class ReviewsService {
     @InjectModel(Review.name) private reviewModel: Model<ReviewDocument>,
   ) {}
 
-  
   async create(dto: CreateReviewDto) {
     return this.reviewModel.create(dto);
   }
 
   async findAll(tour?: string) {
     const filter = tour ? { tour } : {};
-    return this.reviewModel.find(filter).populate("user", "name");
+    return this.reviewModel.find(filter).populate('user', 'name');
   }
 
   async findOne(id: string) {

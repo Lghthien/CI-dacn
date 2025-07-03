@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
@@ -44,7 +45,10 @@ export default function Header() {
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
         setShowDropdown(false);
       }
     };
@@ -67,25 +71,32 @@ export default function Header() {
           />
           <span className="font-extrabold text-2xl md:text-3xl tracking-tight select-none flex">
             <span className="text-sky-800 drop-shadow font-black">Tourism</span>
-            <span className="ml-1 text-pink-600 font-black drop-shadow-lg">World</span>
+            <span className="ml-1 text-pink-600 font-black drop-shadow-lg">
+              World
+            </span>
           </span>
         </Link>
 
         {/* Menu */}
         <nav className="flex items-center gap-2 md:gap-4 relative">
           <Link href="/">
-            <Button variant="ghost" className="px-4 rounded-full font-semibold text-base hover:bg-sky-50">
+            <Button
+              variant="ghost"
+              className="px-4 rounded-full font-semibold text-base hover:bg-sky-50"
+            >
               Trang chủ
             </Button>
           </Link>
           <Link href="/blog">
-            <Button variant="ghost" className="px-4 rounded-full font-semibold text-base hover:bg-sky-50">
+            <Button
+              variant="ghost"
+              className="px-4 rounded-full font-semibold text-base hover:bg-sky-50"
+            >
               Blog
             </Button>
           </Link>
           <ModeToggle />
           <ChatbotPopover /> {/* Chatbot nằm kế bên ModeToggle */}
-
           {/* User Dropdown */}
           {user ? (
             <div className="relative" ref={dropdownRef}>
@@ -143,7 +154,10 @@ export default function Header() {
           ) : (
             <>
               <Link href="/login">
-                <Button variant="outline" className="ml-2 px-5 font-semibold rounded-full border-sky-300 hover:border-sky-400">
+                <Button
+                  variant="outline"
+                  className="ml-2 px-5 font-semibold rounded-full border-sky-300 hover:border-sky-400"
+                >
                   Đăng nhập
                 </Button>
               </Link>

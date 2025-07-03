@@ -9,7 +9,7 @@ import { BlogCommentSchema } from './src/modules/blog-comment/schemas/blog-comme
 
 async function seed() {
   await mongoose.connect(
-    'mongodb+srv://root:123@travelweb.9pr59mm.mongodb.net/travelweb?retryWrites=true&w=majority',
+    process.env.DB_HOST || 'mongodb://localhost:27017/travelweb'
   );
 
   const User = mongoose.model('User', UserSchema);
