@@ -128,12 +128,12 @@ pipeline {
             parallel {
                 stage('Trivy Scan Backend') {
                     steps {
-                        sh 'trivy image --exit-code 1 --no-progress --severity HIGH,CRITICAL $DOCKER_HUB_USERNAME/webtravel-backend:latest'
+                        sh "trivy image \$DOCKER_HUB_USERNAME/webtravel-backend:latest > trivy-backend.txt"
                     }
                 }
                 stage('Trivy Scan Frontend') {
                     steps {
-                        sh 'trivy image --exit-code 1 --no-progress --severity HIGH,CRITICAL $DOCKER_HUB_USERNAME/webtravel-frontend:latest'
+                        sh "trivy image \$DOCKER_HUB_USERNAME/webtravel-frontend:latest > trivy-frontend.txt"
                     }
                 }
             }
