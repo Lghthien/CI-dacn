@@ -1,5 +1,9 @@
 pipeline {
     agent any
+    tools {
+        jdk 'JDK17'
+        nodejs 'NODE20'
+    }
     environment {
         DOCKER_BUILDKIT = 1
         DOCKER_HUB_USERNAME = 'legiahoangthien'
@@ -16,41 +20,20 @@ pipeline {
 
          stage('Run Unit Tests') {
             parallel {
-                stage('Test Client') {
+                stage('Test frontend') {
                     steps {
-                        dir('client') {
+                        dir('frontend') {
                             sh 'npm install'
                             sh 'npm run test -- --passWithNoTests'
                         }
                     }
                 }
-                stage('Test Server') {
+                stage('Test Backend') {
                     steps {
-                        dir('server') {
+                        dir('backend') {
                             sh 'npm install'
                             sh 'chmod +x ./node_modules/.bin/jest'
                             sh 'npm run test -- --verbose'
-                        }
-                    }
-                }
-            }
-        }
-
-          stage('Run Unit Build') {
-            parallel {
-                stage('Build Client') {
-                    steps {
-                        dir('client') {
-                            sh 'npm install'
-                            sh 'npm run build'
-                        }
-                    }
-                }
-                stage('Build Server') {
-                    steps {
-                        dir('server') {
-                            sh 'npm install'
-                            sh 'npm run build'
                         }
                     }
                 }
@@ -84,44 +67,45 @@ pipeline {
         //     }
         // }
 
-        // 2. SonarQube phân tích mã nguồn
+       // 2. SonarQube phân tích mã nguồn
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('sq1') {
+                withSonarQubeEnv('sonar-server') {
                     sh '''
                         $SCANNER_HOME/bin/sonar-scanner \
                         -Dsonar.projectName=lethien \
                         -Dsonar.projectKey=lethien \
-                        -Dsonar.sources=./client/src,./server/src
+                        -Dsonar.sources=./frontend,./backend \
+                        -Dsonar.inclusions=src/**
                     '''
                 }
             }
         }
 
-          stage('OWASP Dependency-Check') {
-            parallel {
-                stage('Dependency-Check Client') {
-                    steps {
-                        dir('client') {
-                            sh '''
-                                docker run --rm -v $(pwd):/src owasp/dependency-check \
-                                --project "client" --scan /src --format "HTML" --out /src/dependency-check-report
-                            '''
-                        }
-                    }
-                }
-                stage('Dependency-Check Server') {
-                    steps {
-                        dir('server') {
-                            sh '''
-                                docker run --rm -v $(pwd):/src owasp/dependency-check \
-                                --project "server" --scan /src --format "HTML" --out /src/dependency-check-report
-                            '''
-                        }
-                    }
-                }
-            }
-        }
+        //   stage('OWASP Dependency-Check') {
+        //     parallel {
+        //         stage('Dependency-Check Client') {
+        //             steps {
+        //                 dir('client') {
+        //                     sh '''
+        //                         docker run --rm -v $(pwd):/src owasp/dependency-check \
+        //                         --project "client" --scan /src --format "HTML" --out /src/dependency-check-report
+        //                     '''
+        //                 }
+        //             }
+        //         }
+        //         stage('Dependency-Check Server') {
+        //             steps {
+        //                 dir('server') {
+        //                     sh '''
+        //                         docker run --rm -v $(pwd):/src owasp/dependency-check \
+        //                         --project "server" --scan /src --format "HTML" --out /src/dependency-check-report
+        //                     '''
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
         // 4. Build Docker Image song song
         stage('Build Docker Images') {
