@@ -1,6 +1,6 @@
 services:
   nextjs:
-    image: backend
+    image: legiahoangthien/nestjs-backend:latest
     ports:
       - "4000:4000"
     env_file:

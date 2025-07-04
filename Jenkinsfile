@@ -8,19 +8,21 @@ pipeline {
         DOCKER_BUILDKIT = 1
         DOCKER_HUB_USERNAME = 'legiahoangthien'
         DOCKERHUB_CREDENTIALS = credentials('travelweb-dockerhub')
-        // SNYK_TOKEN = credentials('snyk-token')      // Đảm bảo đã tạo credential này
         SCANNER_HOME = tool 'jenkins-sonar'
+        DEPENDENCY_CHECK_TOOL = 'DP-Check'
     }
     stages {
+        // 1. Clone source code
         stage('Clone Source') {
             steps {
                 git branch: 'main', url: 'https://github.com/Lghthien/CI-dacn.git'
             }
         }
 
-         stage('Run Unit Tests') {
+        // 2. Run Unit Tests
+        stage('Run Unit Tests') {
             parallel {
-                stage('Test frontend') {
+                stage('Test Frontend') {
                     steps {
                         dir('frontend') {
                             sh 'npm install'
@@ -40,34 +42,33 @@ pipeline {
             }
         }
 
-        // stage('Snyk Scan Source') {
-        //     parallel {
-        //         stage('Snyk Scan Client') {
-        //             steps {
-        //                 dir('client') {
-        //                     sh '''
-        //                         npm install -g snyk
-        //                         snyk auth $SNYK_TOKEN
-        //                         snyk test --all-projects
-        //                     '''
-        //                 }
-        //             }
-        //         }
-        //         stage('Snyk Scan Server') {
-        //             steps {
-        //                 dir('server') {
-        //                     sh '''
-        //                         npm install -g snyk
-        //                         snyk auth $SNYK_TOKEN
-        //                         snyk test --all-projects
-        //                     '''
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+        // 3. Trivy Scan Source Code
+        stage('Trivy Scan Source Code') {
+            parallel {
+                stage('Scan Frontend') {
+                    steps {
+                        script {
+                            dir('frontend') {
+                                sh 'trivy repo . --exit-code 1 --severity HIGH,CRITICAL --format json -o trivy-frontend.json'
+                                sh 'cat trivy-frontend.json'
+                            }
+                        }
+                    }
+                }
+                stage('Scan Backend') {
+                    steps {
+                        script {
+                            dir('backend') {
+                                sh 'trivy repo . --exit-code 1 --severity HIGH,CRITICAL --format json -o trivy-backend.json'
+                                sh 'cat trivy-backend.json'
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
-       // 2. SonarQube phân tích mã nguồn
+        // 4. SonarQube Analysis
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('sonar-server') {
@@ -82,64 +83,45 @@ pipeline {
             }
         }
 
-        //   stage('OWASP Dependency-Check') {
-        //     parallel {
-        //         stage('Dependency-Check Client') {
-        //             steps {
-        //                 dir('client') {
-        //                     sh '''
-        //                         docker run --rm -v $(pwd):/src owasp/dependency-check \
-        //                         --project "client" --scan /src --format "HTML" --out /src/dependency-check-report
-        //                     '''
-        //                 }
-        //             }
-        //         }
-        //         stage('Dependency-Check Server') {
-        //             steps {
-        //                 dir('server') {
-        //                     sh '''
-        //                         docker run --rm -v $(pwd):/src owasp/dependency-check \
-        //                         --project "server" --scan /src --format "HTML" --out /src/dependency-check-report
-        //                     '''
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
-
-        // 4. Build Docker Image song song
+        // 7. Build Docker Images
         stage('Build Docker Images') {
             parallel {
                 stage('Build Backend Image') {
                     steps {
-                        sh 'docker build --no-cache -t $DOCKER_HUB_USERNAME/webtravel-backend:latest ./backend'
+                        sh 'docker build -t $DOCKER_HUB_USERNAME/webtravel-backend:latest ./backend'
                     }
                 }
                 stage('Build Frontend Image') {
                     steps {
-                        sh 'docker build --no-cache -t $DOCKER_HUB_USERNAME/webtravel-frontend:latest ./frontend'
+                        sh 'docker build -t $DOCKER_HUB_USERNAME/webtravel-frontend:latest ./frontend'
                     }
                 }
             }
         }
 
-        // 5. Trivy Scan Container Images
+        // 8. Trivy Scan Container Images
         stage('Trivy Scan Images') {
             parallel {
                 stage('Trivy Scan Backend') {
                     steps {
-                        sh "trivy image \$DOCKER_HUB_USERNAME/webtravel-backend:latest > trivy-backend.txt"
+                        script {
+                            sh "trivy image \$DOCKER_HUB_USERNAME/webtravel-backend:latest > trivy-backend.txt"
+                            sh "cat trivy-backend.txt"
+                        }
                     }
                 }
                 stage('Trivy Scan Frontend') {
                     steps {
-                        sh "trivy image \$DOCKER_HUB_USERNAME/webtravel-frontend:latest > trivy-frontend.txt"
+                        script {
+                            sh "trivy image \$DOCKER_HUB_USERNAME/webtravel-frontend:latest > trivy-frontend.txt"
+                            sh "cat trivy-frontend.txt"
+                        }
                     }
                 }
             }
         }
 
-        // 6. Push Docker Images nếu đã pass hết các bước bảo mật
+        // 9. Login to Docker Hub & Push Images
         stage('Login to Docker Hub & Push Images') {
             steps {
                 sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKER_HUB_USERNAME --password-stdin'
