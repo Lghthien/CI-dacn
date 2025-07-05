@@ -132,7 +132,6 @@ pipeline {
 
         stage('deploys docker compose'){
             steps{
-                sh 'cd /home/ubuntu'
                 sh 'docker-compose up -d'
             }
         }
