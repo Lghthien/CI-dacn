@@ -34,7 +34,7 @@ type Review = {
   createdAt?: string;
 };
 
-const BASE = process.env.NEXT_PUBLIC_API_URL;
+const BASE = "http://localhost:4000";
 
 export default function ViewTourClient() {
   const router = useRouter();
