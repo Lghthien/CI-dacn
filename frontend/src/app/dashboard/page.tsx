@@ -262,7 +262,7 @@ export default function DashboardPage() {
     }
   };
 
-  // Upload ảnh tour riêng (tùy backend)
+  // Upload ảnh tour riêng
   const handleUploadImage = async (file: File) => {
     setMessage("Đang tải ảnh...");
     const token = localStorage.getItem("access_token");

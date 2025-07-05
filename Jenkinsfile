@@ -129,6 +129,8 @@ pipeline {
                 sh 'docker push $DOCKER_HUB_USERNAME/webtravel-frontend:latest'
             }
         }
+
+        stage('')
     }
     post {
         success {
