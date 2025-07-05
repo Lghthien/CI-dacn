@@ -9,7 +9,6 @@ async function bootstrap() {
   console.log('Serving static:', join(process.cwd(), 'uploads'));
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
-  app.setGlobalPrefix('backend');
   app.enableCors({
     origin: [
       'http://localhost:3000',
