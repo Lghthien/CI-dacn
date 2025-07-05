@@ -18,7 +18,7 @@ services:
     image: legiahoangthien/webtravel-frontend:latest
     restart: always  # Chế độ khởi động lại container tự động nếu có lỗi
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:4000
+      - NEXT_PUBLIC_API_URL=http://107.22.60.96:4000
       - HOST=localhost
     ports:
       - "3000:3000"
