@@ -52,7 +52,7 @@ export class BlogPostController {
       throw new Error('No file uploaded');
     }
     // Return absolute url for client
-    const imageUrl = `${process.env.HOST_URL || 'http://localhost:4000'}/uploads/images-blog/${file.filename}`;
+    const imageUrl = `${process.env.HOST_URL || 'http://107.22.60.96:4000'}/uploads/images-blog/${file.filename}`;
     const updated = await this.blogPostService.update(id, { image: imageUrl });
     return { url: imageUrl, ...updated };
   }

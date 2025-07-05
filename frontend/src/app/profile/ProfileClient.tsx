@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Camera } from "lucide-react";
 
-const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const BASE = process.env.NEXT_PUBLIC_API_URL || "http://107.22.60.96:4000";
 
 export default function ProfileClient() {
   const searchParams = useSearchParams();

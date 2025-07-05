@@ -9,7 +9,7 @@ services:
       - JWT_ACCESS_TOKEN_EXPIRATION=10d
       - MONGO_URL=mongodb+srv://root:123@travelweb.9pr59mm.mongodb.net/travelweb?retryWrites=true&w=majority
       - URL_FRONTEND=http://localhost:3000
-      - URL_BACKEND=http://localhost:4000
+      - URL_BACKEND=http://107.22.60.96:4000
       - PORT=4000
       - TOGETHER_API_KEY=b549d855ea87cbc69c57fb29c6378f5e2df70770fd553cc5b3a8549656f5e2bb
     ports:
