@@ -130,7 +130,6 @@ pipeline {
             }
         }
 
-        stage('')
     }
     post {
         success {
