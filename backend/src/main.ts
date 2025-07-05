@@ -11,7 +11,10 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   app.setGlobalPrefix('backend');
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://127.0.0.1:5500'],
+    origin: [
+      'http://a2c622c8d16f642d4a421888b1807521-1932816195.us-east-1.elb.amazonaws.com',
+      'http://127.0.0.1:5500',
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
