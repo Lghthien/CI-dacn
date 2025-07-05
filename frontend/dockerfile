@@ -1,18 +1,22 @@
+# ===== 1. Base image (dùng chung) =====
 FROM node:20-alpine AS base
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# ===== 2. Cài dependencies =====
 FROM base AS deps
 RUN apk add --no-cache libc6-compat
 COPY package.json package-lock.json* ./
 RUN npm ci
 
+# ===== 3. Build app (chỉ prod hoặc test) =====
 FROM base AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
+# ===== 4. Development runner =====
 FROM deps AS dev
 WORKDIR /app
 COPY . .
@@ -20,13 +24,15 @@ ENV NODE_ENV=development
 EXPOSE 3000
 CMD ["npm", "run", "dev"]
 
+# ===== 5. Production runner =====
 FROM base AS runner
 WORKDIR /app
 
-
+# Tạo user bảo mật
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
+# Copy chỉ những file/build cần thiết cho prod
 COPY --from=build /app/public ./public
 COPY --from=build --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=build --chown=nextjs:nodejs /app/.next/static ./.next/static
