@@ -31,4 +31,8 @@ export class ReviewsService {
   async remove(id: string) {
     return this.reviewModel.findByIdAndDelete(id);
   }
+
+  async removeByTour(tourId: string) {
+    return this.reviewModel.deleteMany({ tour: tourId });
+  }
 }
