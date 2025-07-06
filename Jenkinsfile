@@ -12,55 +12,117 @@ pipeline {
         DEPENDENCY_CHECK_TOOL = 'DP-Check'
     }
     stages {
-        // 1. Clone source code
         stage('Clone Source') {
             steps {
                 git branch: 'main', url: 'https://github.com/Lghthien/CI-dacn.git'
             }
         }
 
-        // 2. Run Unit Tests
-        stage('Run Unit Tests') {
+        stage('Build and Push Services') {
             parallel {
-                stage('Test Frontend') {
-                    steps {
-                        dir('frontend') {
-                            sh 'npm install'
-                            sh 'npm run test -- --passWithNoTests'
-                        }
+                stage('Frontend Pipeline') {
+                    when {
+                        changeset "**/frontend/**"
                     }
-                }
-                stage('Test Backend') {
-                    steps {
-                        dir('backend') {
-                            sh 'npm install'
-                            sh 'chmod +x ./node_modules/.bin/jest'
-                            sh 'npm run test -- --verbose'
+                    stages {
+                        stage('Test Frontend') {
+                            steps {
+                                dir('frontend') {
+                                    sh 'npm install'
+                                    sh 'npm run test -- --passWithNoTests'
+                                }
+                            }
                         }
-                    }
-                }
-            }
-        }
-
-        // 3. Trivy Scan Source Code
-        stage('Trivy Scan Source Code') {
-            parallel {
-                stage('Scan Frontend') {
-                    steps {
-                        script {
-                            dir('frontend') {
-                                sh 'trivy repo . --exit-code 1 --severity HIGH,CRITICAL --format json -o trivy-frontend.json'
-                                sh 'cat trivy-frontend.json'
+                        stage('Trivy Scan Frontend') {
+                            steps {
+                                dir('frontend') {
+                                    sh 'trivy repo . --exit-code 1 --severity HIGH,CRITICAL --format json -o trivy-frontend.json'
+                                    sh 'cat trivy-frontend.json'
+                                }
+                            }
+                        }
+                        stage('SonarQube Frontend Analysis') {
+                            steps {
+                                withSonarQubeEnv('sonar-server') {
+                                    sh '''
+                                        $SCANNER_HOME/bin/sonar-scanner \
+                                        -Dsonar.projectName=lethien-frontend \
+                                        -Dsonar.projectKey=lethien-frontend \
+                                        -Dsonar.sources=./frontend \
+                                        -Dsonar.inclusions=src/**
+                                    '''
+                                }
+                            }
+                        }
+                        stage('Build Frontend Docker Image') {
+                            steps {
+                                sh 'docker build -t $DOCKER_HUB_USERNAME/webtravel-frontend:latest ./frontend'
+                            }
+                        }
+                        stage('Trivy Scan Frontend Image') {
+                            steps {
+                                sh 'trivy image $DOCKER_HUB_USERNAME/webtravel-frontend:latest > trivy-frontend.txt'
+                                sh 'cat trivy-frontend.txt'
+                            }
+                        }
+                        stage('Push Frontend Image') {
+                            steps {
+                                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKER_HUB_USERNAME --password-stdin'
+                                sh 'docker push $DOCKER_HUB_USERNAME/webtravel-frontend:latest'
                             }
                         }
                     }
                 }
-                stage('Scan Backend') {
-                    steps {
-                        script {
-                            dir('backend') {
-                                sh 'trivy repo . --exit-code 1 --severity HIGH,CRITICAL --format json -o trivy-backend.json'
-                                sh 'cat trivy-backend.json'
+                stage('Backend Pipeline') {
+                    when {
+                        changeset "**/backend/**"
+                    }
+                    stages {
+                        stage('Test Backend') {
+                            steps {
+                                dir('backend') {
+                                    sh 'npm install'
+                                    sh 'chmod +x ./node_modules/.bin/jest'
+                                    sh 'npm run test -- --verbose'
+                                }
+                            }
+                        }
+                        stage('Trivy Scan Backend') {
+                            steps {
+                                dir('backend') {
+                                    sh 'trivy repo . --exit-code 1 --severity HIGH,CRITICAL --format json -o trivy-backend.json'
+                                    sh 'cat trivy-backend.json'
+                                }
+                            }
+                        }
+                        stage('SonarQube Backend Analysis') {
+                            steps {
+                                withSonarQubeEnv('sonar-server') {
+                                    sh '''
+                                        $SCANNER_HOME/bin/sonar-scanner \
+                                        -Dsonar.projectName=lethien-backend \
+                                        -Dsonar.projectKey=lethien-backend \
+                                        -Dsonar.sources=./backend \
+                                        -Dsonar.inclusions=src/**
+                                    '''
+                                }
+                            }
+                        }
+                        stage('Build Backend Docker Image') {
+                            steps {
+                                sh 'docker build -t $DOCKER_HUB_USERNAME/webtravel-backend:latest ./backend'
+                            }
+                        }
+                        stage('Trivy Scan Backend Image') {
+                            steps {
+                                sh 'trivy image $DOCKER_HUB_USERNAME/webtravel-backend:latest > trivy-backend.txt'
+                                sh 'cat trivy-backend.txt'
+                            }
+                        }
+                        stage('Push Backend Image') {
+                            steps {
+                                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKER_HUB_USERNAME --password-stdin'
+                                sh 'docker push $DOCKER_HUB_USERNAME/webtravel-backend:latest'
                             }
                         }
                     }
@@ -68,75 +130,20 @@ pipeline {
             }
         }
 
-        // 4. SonarQube Analysis
-        stage('SonarQube Analysis') {
+        stage('Deploy Docker Compose') {
+            when {
+                anyOf {
+                    changeset "**/frontend/**"
+                    changeset "**/backend/**"
+                    changeset "docker-compose.yml"
+                }
+            }
             steps {
-                withSonarQubeEnv('sonar-server') {
-                    sh '''
-                        $SCANNER_HOME/bin/sonar-scanner \
-                        -Dsonar.projectName=lethien \
-                        -Dsonar.projectKey=lethien \
-                        -Dsonar.sources=./frontend,./backend \
-                        -Dsonar.inclusions=src/**
-                    '''
-                }
-            }
-        }
-
-        // 7. Build Docker Images
-        stage('Build Docker Images') {
-            parallel {
-                stage('Build Backend Image') {
-                    steps {
-                        sh 'docker build -t $DOCKER_HUB_USERNAME/webtravel-backend:latest ./backend'
-                    }
-                }
-                stage('Build Frontend Image') {
-                    steps {
-                        sh 'docker build -t $DOCKER_HUB_USERNAME/webtravel-frontend:latest ./frontend'
-                    }
-                }
-            }
-        }
-
-        // 8. Trivy Scan Container Images
-        stage('Trivy Scan Images') {
-            parallel {
-                stage('Trivy Scan Backend') {
-                    steps {
-                        script {
-                            sh "trivy image \$DOCKER_HUB_USERNAME/webtravel-backend:latest > trivy-backend.txt"
-                            sh "cat trivy-backend.txt"
-                        }
-                    }
-                }
-                stage('Trivy Scan Frontend') {
-                    steps {
-                        script {
-                            sh "trivy image \$DOCKER_HUB_USERNAME/webtravel-frontend:latest > trivy-frontend.txt"
-                            sh "cat trivy-frontend.txt"
-                        }
-                    }
-                }
-            }
-        }
-
-        // 9. Login to Docker Hub & Push Images
-        stage('Login to Docker Hub & Push Images') {
-            steps {
-                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKER_HUB_USERNAME --password-stdin'
-                sh 'docker push $DOCKER_HUB_USERNAME/webtravel-backend:latest'
-                sh 'docker push $DOCKER_HUB_USERNAME/webtravel-frontend:latest'
-            }
-        }
-
-        stage('deploys docker compose'){
-            steps{
                 sh 'docker-compose up -d'
             }
         }
-
     }
+
     post {
         success {
             echo '🎉 Deployment succeeded!'
