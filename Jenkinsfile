@@ -49,6 +49,7 @@ pipeline {
                                         -Dsonar.projectName=lethien-frontend \
                                         -Dsonar.projectKey=lethien-frontend \
                                         -Dsonar.sources=./frontend \
+                                        -Dsonar.inclusions=src/**
                                     '''
                                 }
                             }
@@ -103,6 +104,7 @@ pipeline {
                                         -Dsonar.projectName=lethien-backend \
                                         -Dsonar.projectKey=lethien-backend \
                                         -Dsonar.sources=./backend \
+                                        -Dsonar.inclusions=src/**
                                     '''
                                 }
                             }
