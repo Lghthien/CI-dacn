@@ -76,7 +76,7 @@ pipeline {
                                         $SCANNER_HOME/bin/sonar-scanner \
                                         -Dsonar.projectName=lethien-frontend \
                                         -Dsonar.projectKey=lethien-frontend \
-                                        -Dsonar.sources=./
+                                        -Dsonar.sources=./frontend
                                     '''
                                 }
                             }
@@ -136,7 +136,7 @@ pipeline {
                                         $SCANNER_HOME/bin/sonar-scanner \
                                         -Dsonar.projectName=lethien-backend \
                                         -Dsonar.projectKey=lethien-backend \
-                                        -Dsonar.sources=./ 
+                                        -Dsonar.sources=./backend
                                     '''
                                 }
                             }
