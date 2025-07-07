@@ -52,6 +52,20 @@ pipeline {
         //     }
         // }
 
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonar-server') {
+                    sh '''
+                        $SCANNER_HOME/bin/sonar-scanner \
+                        -Dsonar.projectKey=lethien \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=http://3.226.107.61:9000 \
+                        -Dsonar.login=sqp_9321a2951f48f576af311fde4fb4902d17fcf456
+                                    '''
+                     }
+                }
+            }
+
         stage('Build and Push Services') {
             parallel {
                 stage('Frontend Pipeline') {
@@ -75,19 +89,7 @@ pipeline {
                                 }
                             }
                         }
-                        stage('SonarQube Frontend Analysis') {
-                            steps {
-                                withSonarQubeEnv('sonar-server') {
-                                    sh '''
-                                        $SCANNER_HOME/bin/sonar-scanner \
-                                        -Dsonar.projectKey=lethien-frontend \
-                                        -Dsonar.sources=. \
-                                        -Dsonar.host.url=http://3.226.107.61:9000 \
-                                        -Dsonar.login=sqp_4689964eaa2521ee090847638dde467dd8b0ae77
-                                    '''
-                                }
-                            }
-                        }
+                        
                         stage('Build Frontend Docker Image') {
                             steps {
                                 sh 'docker build -t $DOCKER_HUB_USERNAME/webtravel-frontend:latest ./frontend'
@@ -133,19 +135,6 @@ pipeline {
                                 dir('backend') {
                                     sh 'trivy repo . --exit-code 1 --severity HIGH,CRITICAL --format json -o trivy-backend.json'
                                     sh 'cat trivy-backend.json'
-                                }
-                            }
-                        }
-                        stage('SonarQube Backend Analysis') {
-                            steps {
-                                withSonarQubeEnv('sonar-server') {
-                                    sh '''
-                                        $SCANNER_HOME/bin/sonar-scanner \
-                                        -Dsonar.projectKey=lethien-backend \
-                                        -Dsonar.sources=./backend \
-                                        -Dsonar.host.url=http://3.226.107.61:9000 \
-                                        -Dsonar.login=sqp_a12cf54643381f2c12908e625b9d7d7b4528dd4f
-                                    '''
                                 }
                             }
                         }
