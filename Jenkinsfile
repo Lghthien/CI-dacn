@@ -28,19 +28,19 @@ pipeline {
                         }
                     }
                     // Clean up Docker images
-                    script {
-                        try {
-                            def dangling_images = sh(script: 'docker images -f "dangling=true" -q', returnStdout: true).trim()
-                            if (dangling_images) {
-                                echo "Đang xóa các Docker images bị treo..."
-                                sh "echo \"$dangling_images\" | xargs docker rmi"
-                            } else {
-                                echo "Không có image Docker bị treo để xóa."
-                            }
-                        } catch (Exception e) {
-                            error "Lỗi khi xóa Docker images: ${e.message}"
-                        }
-                    }
+                    // script {
+                    //     try {
+                    //         def dangling_images = sh(script: 'docker images -f "dangling=true" -q', returnStdout: true).trim()
+                    //         if (dangling_images) {
+                    //             echo "Đang xóa các Docker images bị treo..."
+                    //             sh "echo \"$dangling_images\" | xargs docker rmi"
+                    //         } else {
+                    //             echo "Không có image Docker bị treo để xóa."
+                    //         }
+                    //     } catch (Exception e) {
+                    //         error "Lỗi khi xóa Docker images: ${e.message}"
+                    //     }
+                    // }
                 }
             }
         }
