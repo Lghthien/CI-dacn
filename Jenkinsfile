@@ -41,14 +41,27 @@ pipeline {
                                 }
                             }
                         }
-                        stage('SonarQube Frontend Analysis') {
+                        // stage('SonarQube Frontend Analysis') {
+                        //     steps {
+                        //         withSonarQubeEnv('sonar-server') {
+                        //             sh '''
+                        //                 $SCANNER_HOME/bin/sonar-scanner \
+                        //                 -Dsonar.projectName=lethien-frontend \
+                        //                 -Dsonar.projectKey=lethien-frontend \
+                        //                 -Dsonar.sources=./frontend \
+                        //                 -Dsonar.inclusions=src/**
+                        //             '''
+                        //         }
+                        //     }
+                        // }
+                        stage('SonarQube Analysis') {
                             steps {
                                 withSonarQubeEnv('sonar-server') {
                                     sh '''
                                         $SCANNER_HOME/bin/sonar-scanner \
-                                        -Dsonar.projectName=lethien-frontend \
-                                        -Dsonar.projectKey=lethien-frontend \
-                                        -Dsonar.sources=./frontend \
+                                        -Dsonar.projectName=lethien \
+                                        -Dsonar.projectKey=lethien \
+                                        -Dsonar.sources=./frontend,./backend \
                                         -Dsonar.inclusions=src/**
                                     '''
                                 }
@@ -95,19 +108,19 @@ pipeline {
                                 }
                             }
                         }
-                        stage('SonarQube Backend Analysis') {
-                            steps {
-                                withSonarQubeEnv('sonar-server') {
-                                    sh '''
-                                        $SCANNER_HOME/bin/sonar-scanner \
-                                        -Dsonar.projectName=lethien-backend \
-                                        -Dsonar.projectKey=lethien-backend \
-                                        -Dsonar.sources=./backend \
-                                        -Dsonar.inclusions=src/**
-                                    '''
-                                }
-                            }
-                        }
+                        // stage('SonarQube Backend Analysis') {
+                        //     steps {
+                        //         withSonarQubeEnv('sonar-server') {
+                        //             sh '''
+                        //                 $SCANNER_HOME/bin/sonar-scanner \
+                        //                 -Dsonar.projectName=lethien-backend \
+                        //                 -Dsonar.projectKey=lethien-backend \
+                        //                 -Dsonar.sources=./backend \
+                        //                 -Dsonar.inclusions=src/**
+                        //             '''
+                        //         }
+                        //     }
+                        // }
                         stage('Build Backend Docker Image') {
                             steps {
                                 sh 'docker build -t $DOCKER_HUB_USERNAME/webtravel-backend:latest ./backend'
@@ -130,18 +143,18 @@ pipeline {
             }
         }
 
-        stage('Deploy Docker Compose') {
-            when {
-                anyOf {
-                    changeset "**/frontend/**"
-                    changeset "**/backend/**"
-                    changeset "docker-compose.yml"
-                }
-            }
-            steps {
-                sh 'docker-compose up -d'
-            }
-        }
+        // stage('Deploy Docker Compose') {
+        //     when {
+        //         anyOf {
+        //             changeset "**/frontend/**"
+        //             changeset "**/backend/**"
+        //             changeset "docker-compose.yml"
+        //         }
+        //     }
+        //     steps {
+        //         sh 'docker-compose up -d'
+        //     }
+        // }
     }
 
     post {
