@@ -1,8 +1,9 @@
-def appSourceRepo = 'https://github.com/rockman88v/demo-app.git'
-def appSourceBranch = 'master'
+def appSourceRepo = 'https://github.com/Lghthien/CI-dacn.git'
+def appSourceBranch = 'main'
 
-def appConfigRepo = 'https://github.com/rockman88v/app-helmchart.git'
-def appConfigBranch = 'master'
+def appConfigRepo = 'https://github.com/Lghthien/infrastructure.git'
+def appConfigBranch = 'main'
+
 def helmRepo = "app-helmchart"
 def helmChart = "app-demo"
 def helmValueFile = "app-demo/app-demo-value.yaml"
