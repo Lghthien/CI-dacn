@@ -43,7 +43,7 @@ type Blog = {
   createdAt?: string;
 };
 
-const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const BASE = process.env.NEXT_PUBLIC_API_URL || "http://travel-backend.local";
 
 export default function HomePage() {
   const [tours, setTours] = useState<Tour[]>([]);
