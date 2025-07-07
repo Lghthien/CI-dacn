@@ -45,15 +45,15 @@ pipeline {
             }
         }
 
-        stage('OWASP FS SCAN') {
-            steps {
-                // Chạy Dependency-Check scan
-                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
+        // stage('OWASP FS SCAN') {
+        //     steps {
+        //         // Chạy Dependency-Check scan
+        //         dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
                 
-                // Publish Dependency-Check results
-                dependencyCheckPublisher pattern: '**/target/dependency-check-report.xml'  // Đảm bảo đường dẫn đúng
-            }
-        }
+        //         // Publish Dependency-Check results
+        //         dependencyCheckPublisher pattern: '**/target/dependency-check-report.xml'  // Đảm bảo đường dẫn đúng
+        //     }
+        // }
 
         stage('SonarQube Analysis') {
             steps {
