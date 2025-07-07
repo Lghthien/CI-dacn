@@ -73,7 +73,7 @@ pipeline {
                             steps {
                                 withSonarQubeEnv('sonar-server') {
                                     sh '''
-                                       sonar-scanner \
+                                        SCANNER_HOME \
                                         -Dsonar.projectKey=lethien-frontend \
                                         -Dsonar.sources=. \
                                         -Dsonar.host.url=http://107.22.60.96:9000 \
@@ -134,7 +134,7 @@ pipeline {
                             steps {
                                 withSonarQubeEnv('sonar-server') {
                                     sh '''
-                                       sonar-scanner \
+                                        SCANNER_HOME \
                                         -Dsonar.projectKey=lethien-backend \
                                         -Dsonar.sources=. \backend
                                         -Dsonar.host.url=http://107.22.60.96:9000 \
