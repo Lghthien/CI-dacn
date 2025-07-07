@@ -1,19 +1,3 @@
-def appSourceRepo = 'https://github.com/Lghthien/CI-dacn.git'
-def appSourceBranch = 'main'
-
-def appConfigRepo = 'https://github.com/Lghthien/infrastructure.git'
-def appConfigBranch = 'main'
-
-def helmRepo = "app-helmchart"
-def helmChart = "app-demo"
-def helmValueFile = "app-demo/app-demo-value.yaml"
-
-def dockerhubAccount = 'dockerhub'
-def githubAccount = 'github'
-
-dockerBuildCommand = './'
-def version = "v1.${BUILD_NUMBER}"
-
 pipeline {
     agent any
     tools {
@@ -30,12 +14,25 @@ pipeline {
     stages {
         stage('Clone Source') {
             steps {
-                git branch: 'main', url: 'https://github.com/Lghthien/CI-dacn.git'
-                sh 'docker images -f "dangling=true" -q | xargs docker rmi'
+                withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_TOKEN')]) {
+                    // Clone app source repo
+                    git branch: appSourceBranch, url: appSourceRepo, credentialsId: 'github'
+                    // Clean up Docker images
+                    script {
+                        // Check if there are dangling images and remove them
+                        def dangling_images = sh(script: 'docker images -f "dangling=true" -q', returnStdout: true).trim()
+                        if (dangling_images) {
+                            echo "Removing dangling images..."
+                            sh "echo \"$dangling_images\" | xargs docker rmi"
+                        } else {
+                            echo "No dangling images to remove."
+                        }
+                    }
+                }
             }
-        }
+        }  
 
-        stage('Build and Push Services') { 
+        stage('Build and Push Services') {
             parallel {
                 stage('Frontend Pipeline') {
                     when {
@@ -71,19 +68,6 @@ pipeline {
                                 }
                             }
                         }
-                        // stage('SonarQube Analysis') {
-                        //     steps {
-                        //         withSonarQubeEnv('sonar-server') {
-                        //             sh '''
-                        //                 $SCANNER_HOME/bin/sonar-scanner \
-                        //                 -Dsonar.projectName=lethien \
-                        //                 -Dsonar.projectKey=lethien \
-                        //                 -Dsonar.sources=./frontend,./backend \
-                        //                 -Dsonar.inclusions=src/**
-                        //             '''
-                        //         }
-                        //     }
-                        }
                         stage('Build Frontend Docker Image') {
                             steps {
                                 sh 'docker build -t $DOCKER_HUB_USERNAME/webtravel-frontend:latest ./frontend'
@@ -97,12 +81,19 @@ pipeline {
                         }
                         stage('Push Frontend Image') {
                             steps {
-                                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKER_HUB_USERNAME --password-stdin'
-                                sh 'docker push $DOCKER_HUB_USERNAME/webtravel-frontend:latest'
+                                script {
+                                    try {
+                                        sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKER_HUB_USERNAME --password-stdin'
+                                        sh 'docker push $DOCKER_HUB_USERNAME/webtravel-frontend:latest'
+                                    } catch (Exception e) {
+                                        error "Failed to push frontend image: ${e.message}"
+                                    }
+                                }
                             }
                         }
                     }
                 }
+
                 stage('Backend Pipeline') {
                     when {
                         changeset "**/backend/**"
@@ -151,8 +142,14 @@ pipeline {
                         }
                         stage('Push Backend Image') {
                             steps {
-                                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKER_HUB_USERNAME --password-stdin'
-                                sh 'docker push $DOCKER_HUB_USERNAME/webtravel-backend:latest'
+                                script {
+                                    try {
+                                        sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKER_HUB_USERNAME --password-stdin'
+                                        sh 'docker push $DOCKER_HUB_USERNAME/webtravel-backend:latest'
+                                    } catch (Exception e) {
+                                        error "Failed to push backend image: ${e.message}"
+                                    }
+                                }
                             }
                         }
                     }
@@ -160,26 +157,13 @@ pipeline {
             }
         }
 
-        // stage('Deploy Docker Compose') {
-        //     when {
-        //         anyOf {
-        //             changeset "**/frontend/**"
-        //             changeset "**/backend/**"
-        //             changeset "docker-compose.yml"
-        //         }
-        //     }
-        //     steps {
-        //         sh 'docker-compose up -d'
-        //     }
-        // }
-    // }
-
-    post {
-        success {
-            echo '🎉 Deployment succeeded!'
-        }
-        failure {
-            echo '❌ Deployment failed. Please check the logs for errors.'
+        post {
+            success {
+                echo '🎉 Deployment succeeded!'
+            }
+            failure {
+                echo '❌ Deployment failed. Please check the logs for errors.'
+            }
         }
     }
 }
