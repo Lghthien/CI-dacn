@@ -39,7 +39,7 @@ export default function ChatbotPopover() {
       .slice(-8);
 
     try {
-      const res = await fetch("http://107.22.60.96:4000/chat", {
+      const res = await fetch("http://localhost:4000/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
