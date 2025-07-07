@@ -73,11 +73,11 @@ pipeline {
                             steps {
                                 withSonarQubeEnv('sonar-server') {
                                     sh '''
-                                        $SCANNER_HOME/bin/sonar-scanner \
-                                        -Dsonar.projectName=lethien-frontend \
+                                       sonar-scanner \
                                         -Dsonar.projectKey=lethien-frontend \
-                                        -Dsonar.sources=./frontend \
-                                        -Dsonar.inclusions=src/**
+                                        -Dsonar.sources=. \
+                                        -Dsonar.host.url=http://107.22.60.96:9000 \
+                                        -Dsonar.login=sqp_b7c053e1f80a9d5c328410059249de24df15e1ed
                                     '''
                                 }
                             }
@@ -134,11 +134,11 @@ pipeline {
                             steps {
                                 withSonarQubeEnv('sonar-server') {
                                     sh '''
-                                        $SCANNER_HOME/bin/sonar-scanner \
-                                        -Dsonar.projectName=lethien-backend \
+                                       sonar-scanner \
                                         -Dsonar.projectKey=lethien-backend \
-                                        -Dsonar.sources=./backend \
-                                        -Dsonar.inclusions=src/**
+                                        -Dsonar.sources=. \backend
+                                        -Dsonar.host.url=http://107.22.60.96:9000 \
+                                        -Dsonar.login=sqp_2c51c30f6d5a5e5067c77ef5db928c1718a92592
                                     '''
                                 }
                             }
