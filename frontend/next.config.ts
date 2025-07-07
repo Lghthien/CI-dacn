@@ -3,12 +3,27 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: 'standalone',
   images: {
-    domains: [process.env.HOST || "localhost"],
+    // Cấu hình nhiều domain
+    domains: [
+      "localhost",
+      "travel-backend.local", 
+      "example.com" // Bạn có thể thêm nhiều domain khác
+    ],
     remotePatterns: [
       {
         protocol: "http",
-        hostname: process.env.HOST || "localhost",
-        port: "4000",
+        hostname: "localhost",
+        port: "4000",  // Cổng cho domain đầu tiên
+      },
+      {
+        protocol: "http",
+        hostname: "travel-backend.local",
+        port: "80", 
+      },
+      {
+        protocol: "http",
+        hostname: "example.com",
+        port: "8080", 
       },
     ],
   },
