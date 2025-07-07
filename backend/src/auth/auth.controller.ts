@@ -16,10 +16,10 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
-    // log để debug
+    // LOGIN LOGS
     console.log('👉 Login body:', loginDto);
 
-    // kiểm tra đơn giản
+    // check mail
     if (!loginDto.email || !loginDto.password) {
       throw new BadRequestException('Email và mật khẩu không được bỏ trống');
     }
@@ -30,10 +30,10 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('forgot')
   async forgot(@Body() forgotDto: ForgotDto) {
-    // log để debug
+    // log forgot
     console.log('👉 Forgot body:', forgotDto);
 
-    // kiểm tra đơn giản
+    // check mail
     if (!forgotDto.email || !forgotDto.name) {
       throw new BadRequestException('Email và tên không được bỏ trống');
     }
