@@ -1,3 +1,18 @@
+def appSourceRepo = 'https://github.com/rockman88v/demo-app.git'
+def appSourceBranch = 'master'
+
+def appConfigRepo = 'https://github.com/rockman88v/app-helmchart.git'
+def appConfigBranch = 'master'
+def helmRepo = "app-helmchart"
+def helmChart = "app-demo"
+def helmValueFile = "app-demo/app-demo-value.yaml"
+
+def dockerhubAccount = 'dockerhub'
+def githubAccount = 'github'
+
+dockerBuildCommand = './'
+def version = "v1.${BUILD_NUMBER}"
+
 pipeline {
     agent any
     tools {
@@ -15,10 +30,11 @@ pipeline {
         stage('Clone Source') {
             steps {
                 git branch: 'main', url: 'https://github.com/Lghthien/CI-dacn.git'
+                sh 'docker images -f "dangling=true" -q | xargs docker rmi'
             }
         }
 
-        stage('Build and Push Services') {
+        stage('Build and Push Services') { 
             parallel {
                 stage('Frontend Pipeline') {
                     when {
@@ -41,20 +57,32 @@ pipeline {
                                 }
                             }
                         }
-                        stage('SonarQube Frontend Analysis') {
+                        // stage('SonarQube Frontend Analysis') {
+                        //     steps {
+                        //         withSonarQubeEnv('sonar-server') {
+                        //             sh '''
+                        //                 $SCANNER_HOME/bin/sonar-scanner \
+                        //                 -Dsonar.projectName=lethien-frontend \
+                        //                 -Dsonar.projectKey=lethien-frontend \
+                        //                 -Dsonar.sources=./frontend \
+                        //                 -Dsonar.inclusions=src/**
+                        //             '''
+                        //         }
+                        //     }
+                        // }
+                        stage('SonarQube Analysis') {
                             steps {
                                 withSonarQubeEnv('sonar-server') {
                                     sh '''
                                         $SCANNER_HOME/bin/sonar-scanner \
-                                        -Dsonar.projectName=lethien-frontend \
-                                        -Dsonar.projectKey=lethien-frontend \
-                                        -Dsonar.sources=./frontend \
+                                        -Dsonar.projectName=lethien \
+                                        -Dsonar.projectKey=lethien \
+                                        -Dsonar.sources=./frontend,./backend \
                                         -Dsonar.inclusions=src/**
                                     '''
                                 }
                             }
                         }
-                    
                         stage('Build Frontend Docker Image') {
                             steps {
                                 sh 'docker build -t $DOCKER_HUB_USERNAME/webtravel-frontend:latest ./frontend'
@@ -96,19 +124,19 @@ pipeline {
                                 }
                             }
                         }
-                        stage('SonarQube Backend Analysis') {
-                            steps {
-                                withSonarQubeEnv('sonar-server') {
-                                    sh '''
-                                        $SCANNER_HOME/bin/sonar-scanner \
-                                        -Dsonar.projectName=lethien-backend \
-                                        -Dsonar.projectKey=lethien-backend \
-                                        -Dsonar.sources=./backend \
-                                        -Dsonar.inclusions=src/**
-                                    '''
-                                }
-                            }
-                        }
+                        // stage('SonarQube Backend Analysis') {
+                        //     steps {
+                        //         withSonarQubeEnv('sonar-server') {
+                        //             sh '''
+                        //                 $SCANNER_HOME/bin/sonar-scanner \
+                        //                 -Dsonar.projectName=lethien-backend \
+                        //                 -Dsonar.projectKey=lethien-backend \
+                        //                 -Dsonar.sources=./backend \
+                        //                 -Dsonar.inclusions=src/**
+                        //             '''
+                        //         }
+                        //     }
+                        // }
                         stage('Build Backend Docker Image') {
                             steps {
                                 sh 'docker build -t $DOCKER_HUB_USERNAME/webtravel-backend:latest ./backend'
