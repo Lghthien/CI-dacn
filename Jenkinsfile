@@ -1,15 +1,14 @@
 pipeline {
     agent any
     tools {
-        jdk 'JDK17'
         nodejs 'NODE20'
     }
     environment {
         DOCKER_BUILDKIT = 1
         DOCKER_HUB_USERNAME = 'legiahoangthien'
         DOCKERHUB_CREDENTIALS = credentials('travelweb-dockerhub')
-        SCANNER_HOME = tool 'jenkins-sonar'
-        DEPENDENCY_CHECK_TOOL = 'DP-Check'
+        SCANNER_HOME = tool 'sonar-scanner'
+        DEPENDENCY_CHECK_TOOL = tool 'DP-Check'
         GIT_USERNAME = ''
         GIT_TOKEN = ''
         appSourceBranch = 'main'  // Chỉnh sửa theo nhánh bạn muốn
@@ -46,6 +45,13 @@ pipeline {
             }
         }
 
+        stage('OWASP FS SCAN') {
+            steps {
+                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+        }
+
         stage('Build and Push Services') {
             parallel {
                 stage('Frontend Pipeline') {
@@ -76,7 +82,7 @@ pipeline {
                                         $SCANNER_HOME/bin/sonar-scanner \
                                         -Dsonar.projectName=lethien-frontend \
                                         -Dsonar.projectKey=lethien-frontend \
-                                        -Dsonar.sources=./frontend
+                                        -Dsonar.sources=./frontend \
                                     '''
                                 }
                             }
@@ -134,9 +140,10 @@ pipeline {
                                 withSonarQubeEnv('sonar-server') {
                                     sh '''
                                         $SCANNER_HOME/bin/sonar-scanner \
-                                        -Dsonar.projectName=lethien-backend \
-                                        -Dsonar.projectKey=lethien-backend \
-                                        -Dsonar.sources=./backend
+                                         -Dsonar.projectKey=lethien-backend \
+                                        -Dsonar.sources=./backend \
+                                        -Dsonar.host.url=http://3.226.107.61:9000 \
+                                        -Dsonar.login=sqp_a12cf54643381f2c12908e625b9d7d7b4528dd4f
                                     '''
                                 }
                             }
