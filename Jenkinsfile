@@ -10,27 +10,41 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('travelweb-dockerhub')
         SCANNER_HOME = tool 'jenkins-sonar'
         DEPENDENCY_CHECK_TOOL = 'DP-Check'
+        GIT_USERNAME = ''
+        GIT_TOKEN = ''
+        appSourceBranch = 'main'  // Chỉnh sửa theo nhánh bạn muốn
+        appSourceRepo = 'https://github.com/Lghthien/CI-dacn.git'  // URL của repo Git
     }
     stages {
         stage('Clone Source') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_TOKEN')]) {
                     // Clone app source repo
-                    git branch: appSourceBranch, url: appSourceRepo, credentialsId: 'github'
+                    script {
+                        try {
+                            echo "Cloning repository ${appSourceRepo} branch ${appSourceBranch}..."
+                            git branch: appSourceBranch, url: appSourceRepo, credentialsId: 'github'
+                        } catch (Exception e) {
+                            error "Không thể clone repository: ${e.message}"
+                        }
+                    }
                     // Clean up Docker images
                     script {
-                        // Check if there are dangling images and remove them
-                        def dangling_images = sh(script: 'docker images -f "dangling=true" -q', returnStdout: true).trim()
-                        if (dangling_images) {
-                            echo "Removing dangling images..."
-                            sh "echo \"$dangling_images\" | xargs docker rmi"
-                        } else {
-                            echo "No dangling images to remove."
+                        try {
+                            def dangling_images = sh(script: 'docker images -f "dangling=true" -q', returnStdout: true).trim()
+                            if (dangling_images) {
+                                echo "Đang xóa các Docker images bị treo..."
+                                sh "echo \"$dangling_images\" | xargs docker rmi"
+                            } else {
+                                echo "Không có image Docker bị treo để xóa."
+                            }
+                        } catch (Exception e) {
+                            error "Lỗi khi xóa Docker images: ${e.message}"
                         }
                     }
                 }
             }
-        }  
+        }
 
         stage('Build and Push Services') {
             parallel {
@@ -86,7 +100,7 @@ pipeline {
                                         sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKER_HUB_USERNAME --password-stdin'
                                         sh 'docker push $DOCKER_HUB_USERNAME/webtravel-frontend:latest'
                                     } catch (Exception e) {
-                                        error "Failed to push frontend image: ${e.message}"
+                                        error "Không thể đẩy image frontend: ${e.message}"
                                     }
                                 }
                             }
@@ -147,7 +161,7 @@ pipeline {
                                         sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKER_HUB_USERNAME --password-stdin'
                                         sh 'docker push $DOCKER_HUB_USERNAME/webtravel-backend:latest'
                                     } catch (Exception e) {
-                                        error "Failed to push backend image: ${e.message}"
+                                        error "Không thể đẩy image backend: ${e.message}"
                                     }
                                 }
                             }
@@ -156,14 +170,13 @@ pipeline {
                 }
             }
         }
-
-        post {
-            success {
-                echo '🎉 Deployment succeeded!'
-            }
-            failure {
-                echo '❌ Deployment failed. Please check the logs for errors.'
-            }
+    }
+    post {
+        success {
+            echo '🎉 Triển khai thành công!'
+        }
+        failure {
+            echo '❌ Triển khai thất bại. Vui lòng kiểm tra log để biết thêm chi tiết.'
         }
     }
 }
